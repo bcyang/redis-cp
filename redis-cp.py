@@ -97,6 +97,7 @@ if __name__ == '__main__':
     parser.add_argument('--dport', dest='dport', type=int, help='src port, if different from <port>')
     parser.add_argument('--batch', dest='batch', type=int, default=100, help='batch size')
     parser.add_argument('--verbose', dest='verbose', action='store_true', default=False)
+    parser.add_argument('--pattern', dest='pattern', default='*')
     options = parser.parse_args()
 
     dryrun = options.dryrun
@@ -125,7 +126,7 @@ if __name__ == '__main__':
     processed = 0
     total_copied = 0
     total_skipped = 0
-    for item in src.scan_iter(match='*', count=100):
+    for item in src.scan_iter(match=options.pattern, count=100):
         keys.append(item)
         if len(keys) >= options.batch:
             processed += len(keys)
