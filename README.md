@@ -5,3 +5,25 @@ It's just not on-the-fly.
 
 Other people suggested some good approaches. Here are some ready-to-use codes
 in python.
+
+
+## Common Usages
+```
+# copy redis1/db0 -> redis2/db0 (dryrun)
+redis-cp.py redis1 redis2 --dryrun --verbose
+
+# copy redis1/db3 ->redis2/db3 (dryrun)
+redis-cp.py redis1 redis2 --dryrun --verbose --db 3
+
+# copy redis1/db1 ->redis2/db3 (dryrun)
+redis-cp.py redis1 redis2 --dryrun --verbose --sdb 1 --ddb 3
+```
+
+## Advanced Usages
+```
+# running two redis servers locally (different port) for testing/develop
+redis-cp.py redis1 redis2 --sport 6379 --dport 7777
+
+# change batch size (default is 100, which is just a random pick)
+redis-cp.py redis1 redis2 --batch 500
+```

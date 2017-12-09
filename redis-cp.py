@@ -83,8 +83,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='''
     Copy redis keys from db to another.
     
-    Internally it uses DUMP/RESTORE and preserves TTL and runs in batches (reads n in a pipeline from src, then writes n to dst).
-    
+    Internally it uses MIGRATE (if both redis server versions are > 3.2) or DUMP/RESTORE.
+    TTL is preserved. And batch/pipeline are used.
+
     ''')
     parser.add_argument('src', help='redis src host')
     parser.add_argument('dst', help='redis dst host')
