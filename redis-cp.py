@@ -107,7 +107,7 @@ if __name__ == '__main__':
     sport = options.sport or options.port
     dport = options.dport or options.port
     src = redis.StrictRedis(host=options.src, port=sport, db=sdb)
-    dst = redis.StrictRedis(host=options.dst, port=dport, db=sdb)
+    dst = redis.StrictRedis(host=options.dst, port=dport, db=ddb)
 
     sinfo = src.info()
     dinfo = dst.info()
