@@ -99,6 +99,7 @@ if __name__ == '__main__':
     parser.add_argument('--batch', dest='batch', type=int, default=100, help='batch size')
     parser.add_argument('--verbose', dest='verbose', action='store_true', default=False)
     parser.add_argument('--pattern', dest='pattern', default='*')
+    parser.add_argument('--nomigrate', dest='nomigrate', action='store_true', default=False)
     options = parser.parse_args()
 
     dryrun = options.dryrun
@@ -116,11 +117,12 @@ if __name__ == '__main__':
     version_320 = Version('3.2.0')
     redis32_and_up = Version(sinfo.get('redis_version')) > version_320 and \
                      Version(dinfo.get('redis_version')) > version_320
+    use_migrate = redis32_and_up and not nomigrate
 
     print 'src: %s:%d/%d (%d keys)\ndst: %s:%d/%d (%d keys)\nvia: %s' % (
         options.src, sport, sdb, nkeys_src,
         options.dst, dport, ddb, nkeys_dst,
-        'MIGRATE' if redis32_and_up else 'DUMP/RESTORE'
+        'MIGRATE' if use_migrate else 'DUMP/RESTORE'
     )
 
     keys = []
@@ -133,13 +135,13 @@ if __name__ == '__main__':
             processed += len(keys)
             if options.verbose:
                 print 'migrating %d/%d keys ...' % (processed, nkeys_src)
-            copied, skipped = redis_cp(src, keys, redis32_and_up, dst=dst)
+            copied, skipped = redis_cp(src, keys, use_migrate, dst=dst)
             total_copied += copied
             total_skipped += skipped
             keys = []
     if keys:
         processed += len(keys)
-        copied, skipped = redis_cp(src, keys, redis32_and_up, dst=dst)
+        copied, skipped = redis_cp(src, keys, use_migrate, dst=dst)
         total_copied += copied
         total_skipped += skipped
 
