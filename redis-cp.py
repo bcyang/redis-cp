@@ -117,7 +117,7 @@ if __name__ == '__main__':
     version_320 = Version('3.2.0')
     redis32_and_up = Version(sinfo.get('redis_version')) > version_320 and \
                      Version(dinfo.get('redis_version')) > version_320
-    use_migrate = redis32_and_up and not nomigrate
+    use_migrate = redis32_and_up and not options.nomigrate
 
     print 'src: %s:%d/%d (%d keys)\ndst: %s:%d/%d (%d keys)\nvia: %s' % (
         options.src, sport, sdb, nkeys_src,
