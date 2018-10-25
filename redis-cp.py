@@ -58,14 +58,14 @@ def redis_cp(src, keys, redis32_and_up=False, dst=None):
             src.execute_command(*cmd)
             copied += len(keys)
     else:
-        pipe = src.pipeline()
+        pipe = src.pipeline(transaction=stxn)
         for key in keys:
             pipe.pttl(key)  # restore needs msec
             pipe.dump(key)
         data = pipe.execute()
         tuples = [[keys[i // 2], data[i], data[i + 1]] for i in range(0, len(data), 2)]
 
-        dstpipe = dst.pipeline()
+        dstpipe = dst.pipeline(transaction=dtxn)
         for tup in tuples:
             key, ttl, value = tup
             if ttl == -2:
@@ -95,11 +95,13 @@ if __name__ == '__main__':
     parser.add_argument('--sdb', dest='sdb', type=int, help='src db, if different from <db>')
     parser.add_argument('--ddb', dest='ddb', type=int, help='dst db, if different from <db>')
     parser.add_argument('--sport', dest='sport', type=int, help='src port, if different from <port>')
-    parser.add_argument('--dport', dest='dport', type=int, help='src port, if different from <port>')
+    parser.add_argument('--dport', dest='dport', type=int, help='dst port, if different from <port>')
     parser.add_argument('--batch', dest='batch', type=int, default=100, help='batch size')
     parser.add_argument('--verbose', dest='verbose', action='store_true', default=False)
     parser.add_argument('--pattern', dest='pattern', default='*')
     parser.add_argument('--nomigrate', dest='nomigrate', action='store_true', default=False)
+    parser.add_argument('--stxndsbl', dest='stxndsbl', type=bool, nargs='?', const=True, default=False, help="disable transactions w/ pipeline on src for redis configs that don't support it")
+    parser.add_argument('--dtxndsbl', dest='dtxndsbl', type=bool, nargs='?', const=True, default=False, help="disable transactions w/ pipeline on dst for redis configs that don't support it")
     options = parser.parse_args()
 
     dryrun = options.dryrun
@@ -107,6 +109,8 @@ if __name__ == '__main__':
     ddb = options.ddb or options.db
     sport = options.sport or options.port
     dport = options.dport or options.port
+    stxn = not options.stxndsbl
+    dtxn = not options.dtxndsbl
     src = redis.StrictRedis(host=options.src, port=sport, db=sdb)
     dst = redis.StrictRedis(host=options.dst, port=dport, db=ddb)
 
